@@ -1,0 +1,19 @@
+{
+  "name": "portrait-data-change-app",
+  "version": "0.1.0",
+  "description": "Hono + HTMX + SQLite app for editing files in an S3 bucket with content-hash change detection",
+  "type": "module",
+  "module": "src/index.ts",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.2"
+  }
+}
