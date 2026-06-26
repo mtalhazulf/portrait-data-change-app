@@ -1,24 +1,8 @@
-// Centralised, validated configuration loaded from the environment.
-
-function required(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(
-      `Missing required environment variable: ${name}. Copy .env.example to .env and fill it in.`,
-    );
-  }
-  return value;
-}
+// Bootstrap configuration. Only the bits needed to start the process and open
+// the database live here — the S3 connection settings are stored in SQLite and
+// managed in ./settings.ts (so they can be edited at runtime, not just via env).
 
 export const config = {
-  s3: {
-    bucket: required("S3_BUCKET"),
-    region: process.env.S3_REGION || "us-east-1",
-    accessKeyId: required("S3_ACCESS_KEY_ID"),
-    secretAccessKey: required("S3_SECRET_ACCESS_KEY"),
-    // Empty for AWS S3; set for R2 / MinIO / other S3-compatible providers.
-    endpoint: process.env.S3_ENDPOINT || undefined,
-  },
   port: Number(process.env.PORT || 3000),
   dbPath: process.env.DB_PATH || "./data.sqlite",
 };

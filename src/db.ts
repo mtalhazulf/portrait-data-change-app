@@ -9,6 +9,11 @@ export const db = new Database(config.dbPath, { create: true });
 db.exec("PRAGMA journal_mode = WAL;");
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS app_config (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS file_meta (
     key          TEXT PRIMARY KEY,
     content_hash TEXT NOT NULL,
@@ -26,6 +31,26 @@ db.exec(`
     at         TEXT NOT NULL
   );
 `);
+
+// --- Generic key/value config store ---
+
+interface ConfigRow {
+  value: string;
+}
+
+export function getConfigValue(key: string): string | null {
+  const row = db
+    .query<ConfigRow, [string]>("SELECT value FROM app_config WHERE key = ?")
+    .get(key);
+  return row ? row.value : null;
+}
+
+export function setConfigValue(key: string, value: string): void {
+  db.query(
+    `INSERT INTO app_config (key, value) VALUES (?, ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+  ).run(key, value);
+}
 
 export interface FileMeta {
   key: string;

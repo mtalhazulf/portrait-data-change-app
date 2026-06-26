@@ -9,6 +9,7 @@ import {
   objectExists,
 } from "./s3.ts";
 import { getMeta, recentLog } from "./db.ts";
+import { ensureS3Config, getS3Config } from "./settings.ts";
 import { removeFile, saveFile, syncMetaFromS3 } from "./files.ts";
 import { contentTypeFor } from "./hash.ts";
 import {
@@ -128,8 +129,25 @@ app.delete("/api/file", async (c) => {
   }
 });
 
+// Startup: ensure S3 configuration exists in the database, seeding hard-coded
+// placeholder defaults when it is missing.
+const cfgStatus = ensureS3Config();
+const s3cfg = getS3Config();
+if (cfgStatus.seeded) {
+  console.log(
+    "No S3 configuration found — seeded default values into the database" +
+      (cfgStatus.usingPlaceholders ? " (placeholders)." : " from environment variables."),
+  );
+}
+if (cfgStatus.usingPlaceholders) {
+  console.warn(
+    "⚠️  S3 is using PLACEHOLDER credentials. Replace them with the correct values\n" +
+      "    (edit the app_config table in the SQLite database) before S3 operations will work.",
+  );
+}
+
 console.log(
-  `S3 File Editor running on http://localhost:${config.port} (bucket: ${config.s3.bucket})`,
+  `S3 File Editor running on http://localhost:${config.port} (bucket: ${s3cfg.bucket})`,
 );
 
 export default {
